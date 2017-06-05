@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>mohy fav places</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="js/knockout.js" ></script>
+     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDYLCNr83-dCuECQUdGihmBT4zpyVUdpaQ&callback=initMap&libraries=places&"
+    async defer></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/underscore.js"></script>
+    <script src="js/main.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+<body>
+    <div class="container">
+        <div class="md-1">
+            <div class="search">
+                <img class="search-icon" src="img/search.svg">
+                <input class="search-input" type="search" placeholder="type your favourite place here" data-bind="textInput: input, event: {keyup: filter}">
+                <img class="down-btn" data-bind="click: showlist,attr: {src: src}">
+            </div>
+            <div class="marked-places" data-bind="style: {display: display}">
+                <table data-bind="foreach: list" >
+                <tr>
+                <td class="visited" data-bind="text: title,click: $root.goto"></td>
+                <td><img class="gallery" src="img/gallery.svg" data-bind="attr: {id: id}, click: $root.gallery"></td>
+                </tr>
+                </table>
+                <img class="up-btn" src="img/up.svg" data-bind="click: $root.hidelist">
+            </div>
+
+        </div>
+        <div id="map" class="md-2">
+        </div>
+    </div>
+    <div class="all_view" data-bind="style: {display: close_btn}">
+        <img class="place-photo" src="" data-bind="attr: {src: place_photo}" alt="place photo">
+        <img class="left" src="img/left.svg" data-bind="click: next" alt="next">
+        <img  class="right" src="img/right.svg" data-bind="click: next" alt="next">
+        <img class="close" src="img/close.svg" data-bind="click: close" alt="close">
+    </div>
+</body>
+</html>
