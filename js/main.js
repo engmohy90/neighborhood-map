@@ -66,23 +66,28 @@ var myLatLng = [
     photos: []
 }];
 
-function flickrAjax(){
-    for (var i = 0; i < myLatLng.length; i++) {
+var flickrAjax = function (obj){
         $.ajax({
             url: 'https://api.flickr.com/services/rest/?method=flickr' +
             '.photos.search&format=json&nojsoncallback=1&api_key=fd67c48b64b182c1ed623' +
-            'bbb91df830c&per_page=3&extras=url_s&text=' + myLatLng[i].title,
+            'bbb91df830c&per_page=3&extras=url_s&text=' + obj.title,
             dataType: 'json',
-            async: false
+            async: true
         }).done(function(data){
+            var index = myLatLng.indexOf(obj)
             data.photos.photo.forEach(function(obj) {
-               myLatLng[i].photos.push(obj.url_s);
+               myLatLng[index].photos.push(obj.url_s);
             });
         }).fail(function() {
             alert( "error loading photos" );
         });
-    }
 }
+
+for (var i = 0; i < myLatLng.length; i++){
+    flickrAjax(myLatLng[i])
+}
+
+
 
 // google map api init function for loading map and its data
 
@@ -120,9 +125,12 @@ function initMap() {
             var data = myLatLng[myLatLng.findIndex(function(obj) {
                 return obj.title == that.title;
             })];
-            infowindow.setContent('<h4>' + that.title + '</h4>' + '<p>' +
+            if (data.photos == []){
+                flickrAjax(data)
+            }
+            infowindow.setContent('<div><h4>' + that.title + '</h4>' + '<p>' +
                 data.info + '<hr>' + data.url + '</p> <img src="' +
-                data.photos[0] + '" class="infophoto" >');
+                data.photos[0] + '" class="infophoto" ></div>');
 
             infowindow.open(map, that);
         });
@@ -199,8 +207,8 @@ function viewModal () {
     };
     that.gallery = function(data) {
         that.close_btn('');
-        that.place_photo(data.photos[0])
-        photos = data.photos;
+        photos = data.photos
+        that.place_photo(data.photos[0]);
     };
 
     that.next = function() {
@@ -220,4 +228,3 @@ function viewModal () {
 var activeModel = new viewModal();
 // activating the binding 
 ko.applyBindings(activeModel);
-flickrAjax()
