@@ -17,14 +17,17 @@ var myLatLng = [
     location: {lat: 21.4228714, lng: 39.8257347},
     url: 'https://en.wikipedia.org/wiki/Masjid_Al_Haram',
     info: 'no avaliable data',
-    id: 'abc'
+    id: 'abc',
+    photos: []
 },
 {
     title: 'Makkah Hilton Towers',
     location: {lat: 21.419778, lng: 39.82346},
     url: 'no avaliable data',
     info: 'no avaliable data',
-    id: 'def'
+    id: 'def',
+    photos: []
+
 
 },
 {
@@ -34,29 +37,52 @@ var myLatLng = [
     info: 'The Kaaba Al Kaaba Al Musharrafah (The Holy Kaaba), is a ' +
     "building at the center of Islam's most sacred mosque, Al-Masjid " +
     'al-Haram, in Mecca, al-Hejaz, Saudi Arabia.',
-    id: 'ghi'
+    id: 'ghi',
+    photos: []
+
 },
 {
     title: 'Safa and Marwa',
     location: {lat: 21.423526, lng: 39.827374},
     url: 'https://en.wikipedia.org/wiki/Safa_and_Marwah',
     info: 'no avaliable data',
-    id: 'jkl'
+    id: 'jkl',
+    photos: []
 },
 {
     title: 'Makkah Al Mukarramah Library',
     location: {lat: 21.4249648, lng: 39.8298972},
     url: 'no avaliable data',
     info: 'no avaliable data',
-    id: 'mno'
+    id: 'mno',
+    photos: []
 },
 {
     title: 'Makkah Clock Royal Tower',
     location: {lat: 21.4180198, lng: 39.8259035},
     url: 'https://en.wikipedia.org/wiki/MAKKAH_CLOCK_ROYAL_TOWER',
     info: 'no avaliable data',
-    id: 'pqr'
+    id: 'pqr',
+    photos: []
 }];
+
+function flickrAjax(){
+    for (var i = 0; i < myLatLng.length; i++) {
+        $.ajax({
+            url: 'https://api.flickr.com/services/rest/?method=flickr' +
+            '.photos.search&format=json&nojsoncallback=1&api_key=fd67c48b64b182c1ed623' +
+            'bbb91df830c&per_page=3&extras=url_s&text=' + myLatLng[i].title,
+            dataType: 'json',
+            async: false
+        }).done(function(data){
+            data.photos.photo.forEach(function(obj) {
+               myLatLng[i].photos.push(obj.url_s);
+            });
+        }).fail(function() {
+            alert( "error loading photos" );
+        });
+    }
+}
 
 // google map api init function for loading map and its data
 
@@ -95,7 +121,8 @@ function initMap() {
                 return obj.title == that.title;
             })];
             infowindow.setContent('<h4>' + that.title + '</h4>' + '<p>' +
-                data.info + '<hr>' + data.url + '</p>');
+                data.info + '<hr>' + data.url + '</p> <img src="' +
+                data.photos[0] + '" class="infophoto" >');
 
             infowindow.open(map, that);
         });
@@ -105,30 +132,8 @@ function initMap() {
 
 }
 
-//  callback function to handle response from flickr which forcing this function 
-function jsonFlickrApi(result) {
-
-    result.photos.photo.forEach(function(obj, i) {
-        photos.push(obj.url_s);
-    });
-
-    activeModel.next();
-}
-function flickrajax(data){
-    $.ajax({
-        url: 'https://api.flickr.com/services/rest/?method=flickr' +
-        '.photos.search&format=json&api_key=fd67c48b64b182c1ed623' +
-        'bbb91df830c&per_page=3&extras=url_s&tags=' + data,
-
-        dataType: 'jsonp',
-        async: true
-    }).fail(function() {
-        alert( "error with flickr" );
-    });
-};
-
-    // handel the project with knock 
-    // create the viewModal function
+// handel the project with knock 
+// create the viewModal function
 
 function viewModal () {
     var that = this;
@@ -167,6 +172,18 @@ function viewModal () {
             if (obj.title.toLowerCase().indexOf(keyword.toLowerCase()) > -1) {
                 return obj}
         });
+       var markersFilterd = _.filter(markers, function(obj) {
+            if (obj.title.toLowerCase().indexOf(keyword.toLowerCase()) > -1) {
+                return obj}
+            });
+
+       markers.forEach(function(marker){marker.setMap(null)});
+       markersFilterd.forEach(function(marker){
+        marker.setMap(map);
+        marker.setAnimation(google.maps.Animation.DROP);
+
+       })
+
        that.list(filtered);
        that.showlist();
        if (y.keyCode === 13) {
@@ -182,9 +199,8 @@ function viewModal () {
     };
     that.gallery = function(data) {
         that.close_btn('');
-        that.place_photo('')
-        photos = [];
-        flickrajax(data.title)   
+        that.place_photo(data.photos[0])
+        photos = data.photos;
     };
 
     that.next = function() {
@@ -204,3 +220,4 @@ function viewModal () {
 var activeModel = new viewModal();
 // activating the binding 
 ko.applyBindings(activeModel);
+flickrAjax()
