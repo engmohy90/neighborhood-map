@@ -190,9 +190,14 @@ table {
 
 .infophoto{
 
-    position: absolute;
-    opacity: .3;
-    width: 100%;
-    z-index: 1;
-    top: 0;
+    max-width: 150px;
+    max-height: 150px;
+}
+.infotext {
+    display: flex;
+
+}
+.infowindow {
+    max-height: 250px;
+    
 }
